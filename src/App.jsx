@@ -1,34 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import  { use, useState } from 'react'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [task, setTask] = useState('')
+  const [tasks, setTasks] = useState([])
+
+  const addTask = () => {
+    setTasks([...tasks,task])
+    setTask('')
+  }
+
+  const deleteTask = (deleted) => {
+    const withoutRemoved = tasks.filter(item => item!==deleted)
+    setTasks(withoutRemoved)
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div>
+      <h3>Todos</h3>
+      <form>
+        <input placeholder='Add new task'
+        value ={task}
+        onChange={e => setTask(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            addTask()
+          }
+        }}
+        />
+      </form>
+      <ul>
+        {
+          tasks.map(item => (
+          <li>
+            {item}
+            <button
+              className='delete-button'
+              onClick={() => deleteTask(item)}>
+              Delete
+            </button>            
+          </li>
+          ))
+        }
+      </ul>
+    </div>
   )
 }
 
