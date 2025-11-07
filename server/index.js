@@ -16,7 +16,7 @@ const openDb = () => {
         host: 'localhost',
         database: 'todo',
         password: '1234',
-        port: 3001
+        port: 5432
     })
     return pool
 }
