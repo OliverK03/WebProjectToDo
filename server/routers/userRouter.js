@@ -12,7 +12,7 @@ router.post('/signup', (req, res, next) => {
     const { user } = req.body
 
     if (!user || !user.email || !user.password) {
-        return next(ApiError('Email and password are required'),400)
+        return next(new ApiError('Email and password are required'),400)
     }
     hash(user.password, 10, (err, hashedPassword) => {
         if (err) return next(err)
@@ -31,13 +31,13 @@ router.post('/signup', (req, res, next) => {
 router.post('/signin', (req, res, next) => {
     const {user} = req.body
     if(!user || !user.email || !user.password) {
-        return next(ApiError('Email and password are required'), 400)
+        return next(new ApiError('Email and password are required'), 400)
     }
     pool.query('SELECT * FROM account WHERE email = $1', [user.email], (err, result) => {
         if(err) return next(err)
 
         if(result.rows.length === 0) {
-            return next(ApiError('User not found',404))
+            return next(new ApiError('User not found',404))
         }
 
         const dbUser = result.rows[0]
@@ -46,7 +46,7 @@ router.post('/signin', (req, res, next) => {
             if(err) return next(err)
 
             if(!isMatch) {
-                return next(ApiError('Invalid password',401))
+                return next(new ApiError('Invalid password',401))
             }
         })
         const token = sign({ user: dbUser.email}, process.env.JWT_SECRET_KEY)
