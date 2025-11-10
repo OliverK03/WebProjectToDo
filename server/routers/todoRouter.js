@@ -1,25 +1,27 @@
 import { pool } from '../helper/db.js'
 import { auth } from '../helper/auth.js'
 import { Router } from 'express'
+import { getTasks } from '../controllers/TaskController.js'
+import { ApiError } from '../helper/apierror.js'
 
 const router = Router()
 
-router.get('/', (req, res, next) => {
+router.get('/', getTasks)
+
+/*router.get('/', (req, res, next) => {
     pool.query('SELECT * FROM task',(err, result) => {
         if(err) {
             return next (err)
         }
         res.status(200).json(result.rows)
     })
-})
+}) */
 
 router.post('/create', auth,(req, res, next) => {
     const { task } = req.body
 
     if (!task || !task.description) {
-        const error = new Error('Task description is required')
-        error.status = 400
-        return next(error)
+        return next(new ApiError('Task description is required',400))
     }
 
     pool.query('insert into task (description) values ($1) returning *', [task.description],
@@ -41,9 +43,7 @@ router.delete('/delete/:id', (req, res, next) => {
                 return next (err)
             }
             if (result.rowCount === 0) {
-                const error = new Error('Task not found')
-                error.status = 404
-                return next (error)
+                return next (ApiError('Task not found'),404)
             }
             return res.status(200).json({id:id})
         })

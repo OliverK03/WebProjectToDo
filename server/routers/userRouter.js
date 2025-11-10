@@ -2,6 +2,7 @@ import { pool } from "../helper/db.js"
 import { Router } from 'express'
 import { hash, compare } from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { ApiError } from "../helper/apierror.js"
 
 const { sign } = jwt
 
@@ -11,9 +12,7 @@ router.post('/signup', (req, res, next) => {
     const { user } = req.body
 
     if (!user || !user.email || !user.password) {
-        const error = new Error('Email and password are required')
-        error.status = 400
-        return next(error)
+        return next(ApiError('Email and password are required'),400)
     }
     hash(user.password, 10, (err, hashedPassword) => {
         if (err) return next(err)
@@ -32,17 +31,13 @@ router.post('/signup', (req, res, next) => {
 router.post('/signin', (req, res, next) => {
     const {user} = req.body
     if(!user || !user.email || !user.password) {
-        const error = new Error('Email and password are required')
-        error.status = 400
-        return next(error)
+        return next(ApiError('Email and password are required'), 400)
     }
     pool.query('SELECT * FROM account WHERE email = $1', [user.email], (err, result) => {
         if(err) return next(err)
 
         if(result.rows.length === 0) {
-            const error = new Error('User not found')
-            error.status = 404
-            return next(error)
+            return next(ApiError('User not found',404))
         }
 
         const dbUser = result.rows[0]
@@ -51,9 +46,7 @@ router.post('/signin', (req, res, next) => {
             if(err) return next(err)
 
             if(!isMatch) {
-                const error = new Error('Invalid password')
-                error.status = 401
-                return next(error)
+                return next(ApiError('Invalid password',401))
             }
         })
         const token = sign({ user: dbUser.email}, process.env.JWT_SECRET_KEY)
